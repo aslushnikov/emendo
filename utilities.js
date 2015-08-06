@@ -1463,7 +1463,7 @@ function suppressUnused(value)
  * @param {function()} callback
  * @return {number}
  */
-self.setImmediate = function(callback)
+setImmediate = function(callback)
 {
     Promise.resolve().then(callback);
     return 0;

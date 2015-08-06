@@ -1,0 +1,25 @@
+{
+  "name": "emendo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Shim.js",
+  "dependencies": {
+    "gulp": "^3.9.0"
+  },
+  "devDependencies": {
+    "closurecompiler": "^1.5.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aslushnikov/emendo.git"
+  },
+  "author": "aslushnikov@gmail.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aslushnikov/emendo/issues"
+  },
+  "homepage": "https://github.com/aslushnikov/emendo#readme"
+}

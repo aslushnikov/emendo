@@ -83,50 +83,6 @@ WebInspector.SourceMap = function(sourceMappingURL, payload)
     this._parseMappingPayload(payload);
 }
 
-/**
- * @param {string} sourceMapURL
- * @param {string} compiledURL
- * @param {function(?WebInspector.SourceMap)} callback
- * @this {WebInspector.SourceMap}
- */
-WebInspector.SourceMap.load = function(sourceMapURL, compiledURL, callback)
-{
-    var parsedURL = new WebInspector.ParsedURL(sourceMapURL);
-    if (parsedURL.isDataURL()) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", sourceMapURL, false);
-        xhr.send(null);
-        contentLoaded(xhr.status, {}, xhr.responseText);
-        return;
-    }
-
-    WebInspector.ResourceLoader.loadUsingTargetUA(sourceMapURL, null, contentLoaded);
-
-    /**
-     * @param {number} statusCode
-     * @param {!Object.<string, string>} headers
-     * @param {string} content
-     */
-    function contentLoaded(statusCode, headers, content)
-    {
-        if (!content || statusCode >= 400) {
-            callback(null);
-            return;
-        }
-
-        if (content.slice(0, 3) === ")]}")
-            content = content.substring(content.indexOf('\n'));
-        try {
-            var payload = /** @type {!SourceMapV3} */ (JSON.parse(content));
-            var baseURL = sourceMapURL.startsWith("data:") ? compiledURL : sourceMapURL;
-            callback(new WebInspector.SourceMap(baseURL, payload));
-        } catch(e) {
-            console.error(e.message);
-            callback(null);
-        }
-    }
-}
-
 WebInspector.SourceMap.prototype = {
     /**
      * @return {string}
@@ -151,19 +107,6 @@ WebInspector.SourceMap.prototype = {
     sourceContent: function(sourceURL)
     {
         return this._sourceContentByURL[sourceURL];
-    },
-
-    /**
-     * @param {string} sourceURL
-     * @param {!WebInspector.ResourceType} contentType
-     * @return {!WebInspector.ContentProvider}
-     */
-    sourceContentProvider: function(sourceURL, contentType)
-    {
-        var sourceContent = this.sourceContent(sourceURL);
-        if (sourceContent)
-            return new WebInspector.StaticContentProvider(contentType, sourceContent);
-        return new WebInspector.CompilerSourceMappingContentProvider(sourceURL, contentType);
     },
 
     /**
