@@ -85,6 +85,32 @@ WebInspector.SourceMap = function(sourceMappingURL, payload)
 
 WebInspector.SourceMap.prototype = {
     /**
+     * @param {!WebInspector.TextRange} oldRange
+     * @param {!WebInspector.TextRange} newRange
+     * @return {boolean}
+     */
+    compiledRangeEdited: function(oldRange, newRange)
+    {
+        console.assert(oldRange.startLine === newRange.startLine);
+        console.assert(oldRange.startColumn === newRange.startColumn);
+        var lineOffset = newRange.endLine - oldRange.endLine;
+        var columnOffset = newRange.endColumn - oldRange.endColumn;
+        var entry = this.findEntry(oldRange.startLine, oldRange.startColumn);
+        for (var i = 0; i < this._mappings.length; ++i) {
+            var mapping = this._mappings[i];
+            if (mapping[2] !== entry[2])
+                continue;
+            if (oldRange.containsLocation(mapping[0], mapping[1]))
+                return false;
+            if (mapping[0] < oldRange.startLine || (mapping[0] === oldRange.startLine && mapping[1] < oldRange.startColumn))
+                continue;
+            mapping[3] += lineOffset;
+            mapping[4] += columnOffset;
+        }
+        return true;
+    },
+
+    /**
      * @return {string}
      */
     url: function()

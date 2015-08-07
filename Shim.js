@@ -22,7 +22,7 @@ fs.readFile(mapURL, "utf-8", function(error, text) {
         sources.set(sourceName, fs.readFileSync(sourceName, "utf-8"));
     }
     console.log(sourceMap.findEntry(0, 2));
-    canEditCompiled(compiled, sourceMap, sources, new WebInspector.TextRange(0, 4, 0, 6));
+    console.log(canEditCompiled(compiled, sourceMap, sources, new WebInspector.TextRange(0, 4, 0, 6)));
 });
 
 /**
@@ -43,18 +43,37 @@ function extractSubstring(text, range) {
  * @return {boolean}
  */
 function canEditCompiled(compiled, map, sources, range) {
-    var startEntry = map.findEntry(range.startLine, range.startColumn);
+    var entry = map.findEntry(range.startLine, range.startColumn);
     var endEntry = map.findEntry(range.endLine, range.endColumn);
-    // Return if start and end are mapped to different source files.
-    if (startEntry[2] !== endEntry[2])
+    // Return if start and end are not inside mapped segment.
+    if (entry !== endEntry)
         return false;
-    var source = sources.get(startEntry[2]);
+    var source = sources.get(entry[2]);
     // Return if we don't have source for mapped entries.
     if (!source)
         return false;
-    var mappedRange = new WebInspector.TextRange(startEntry[3], startEntry[4] + range.startColumn - startEntry[1], endEntry[3], endEntry[4] + range.endColumn - endEntry[1]);
+    var mappedRange = new WebInspector.TextRange(entry[3] + range.startLine - entry[0], entry[4] + range.startColumn - entry[1], entry[3] + range.endLine - entry[0], entry[4] + range.endColumn - entry[1]);
     var compiledText = extractSubstring(compiled, range);
     var sourceText = extractSubstring(source, mappedRange);
+    console.log("Compiled: %s", compiledText);
+    console.log("Source: %s", sourceText);
     return compiledText === sourceText;
+}
+
+function editCompiled(compiled, map, sources, range, newText) {
+    var entry = map.findEntry(range.startLine, range.startColumn);
+    var endEntry = map.findEntry(range.endLine, range.endColumn);
+    // Return if start and end are not inside mapped segment.
+    if (entry !== endEntry)
+        return false;
+    var source = sources.get(entry[2]);
+    // Return if we don't have source for mapped entries.
+    if (!source)
+        return false;
+    var mappedRange = new WebInspector.TextRange(entry[3] + range.startLine - entry[0], entry[4] + range.startColumn - entry[1], entry[3] + range.endLine - entry[0], entry[4] + range.endColumn - entry[1]);
+    var compiledText = extractSubstring(compiled, range);
+    var sourceText = extractSubstring(source, mappedRange);
+    console.log("Compiled: %s", compiledText);
+    console.log("Source: %s", sourceText);
 }
 

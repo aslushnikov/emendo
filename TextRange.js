@@ -276,7 +276,25 @@ WebInspector.TextRange.prototype = {
     {
         var sourceRange = this.toSourceRange(text);
         return text.substring(0, sourceRange.offset) + replacement + text.substring(sourceRange.offset + sourceRange.length);
-    }
+    },
+
+    /**
+     * @param {number} lineNumber
+     * @param {number} columnNumber
+     * @return {boolean}
+     */
+    containsLocation: function(lineNumber, columnNumber)
+    {
+        if (this.startLine > lineNumber)
+            return false;
+        if (this.endLine < lineNumber)
+            return false;
+        if (this.startLine === lineNumber && this.startColumn <= columnNumber)
+            return true;
+        if (this.endLine === lineNumber && columnNumber <= this.endColumn)
+            return true;
+        return this.startLine < lineNumber && lineNumber < this.endLine;
+    },
 }
 
 /**
