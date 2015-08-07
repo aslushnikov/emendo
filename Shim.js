@@ -73,6 +73,13 @@ function editCompiled(compiled, map, sources, range, newText) {
     var mappedRange = new WebInspector.TextRange(entry[3] + range.startLine - entry[0], entry[4] + range.startColumn - entry[1], entry[3] + range.endLine - entry[0], entry[4] + range.endColumn - entry[1]);
     var compiledText = extractSubstring(compiled, range);
     var sourceText = extractSubstring(source, mappedRange);
+    if (compiledText !== sourceText)
+        return false;
+    var newCompiled = range.replaceInText(compiledText, newText);
+    var newSource = mappedRange.replaceInText(source, newText);
+    
+    //var newTextRange = new WebInspector.TextRange(0, 0, newText.lineEndings().length - 1, newText
+
     console.log("Compiled: %s", compiledText);
     console.log("Source: %s", sourceText);
 }
