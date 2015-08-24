@@ -289,11 +289,15 @@ WebInspector.TextRange.prototype = {
             return false;
         if (this.endLine < lineNumber)
             return false;
-        if (this.startLine === lineNumber && this.startColumn <= columnNumber)
+        if (this.startLine < lineNumber && lineNumber < this.endLine)
             return true;
-        if (this.endLine === lineNumber && columnNumber <= this.endColumn)
-            return true;
-        return this.startLine < lineNumber && lineNumber < this.endLine;
+        if (this.startLine === this.endLine && this.startLine === lineNumber)
+            return this.startColumn < columnNumber && columnNumber < this.endColumn;
+        if (this.startLine === lineNumber)
+            return this.startColumn < columnNumber;
+        if (this.endLine === lineNumber)
+            return this.endColumn > columnNumber;
+        return false;
     },
 }
 

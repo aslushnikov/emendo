@@ -100,12 +100,18 @@ WebInspector.SourceMap.prototype = {
             var mapping = this._mappings[i];
             if (mapping[2] !== entry[2])
                 continue;
-            if (oldRange.containsLocation(mapping[0], mapping[1]))
+            if (oldRange.containsLocation(mapping[0], mapping[1])) {
+                console.log("Old range: " + JSON.stringify(oldRange));
+                console.log("Location: (%d, %d)", mapping[0], mapping[1]);
                 return false;
+            }
             if (mapping[0] < oldRange.startLine || (mapping[0] === oldRange.startLine && mapping[1] < oldRange.startColumn))
                 continue;
+            mapping[0] += lineOffset;
+            mapping[1] += columnOffset;
             mapping[3] += lineOffset;
             mapping[4] += columnOffset;
+            console.log("lineOffset: %d  columnOffset: %d", lineOffset, columnOffset);
         }
         return true;
     },
