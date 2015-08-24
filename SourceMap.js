@@ -93,25 +93,27 @@ WebInspector.SourceMap.prototype = {
     {
         console.assert(oldRange.startLine === newRange.startLine);
         console.assert(oldRange.startColumn === newRange.startColumn);
-        var lineOffset = newRange.endLine - oldRange.endLine;
+        // FIXME: We support inline edits only.
+        if (newRange.startLine !== newRange.endLine || oldRange.startLine !== oldRange.endLine)
+            return false;
         var columnOffset = newRange.endColumn - oldRange.endColumn;
         var entry = this.findEntry(oldRange.startLine, oldRange.startColumn);
+        // Validate that edit does not eat any mapping.
         for (var i = 0; i < this._mappings.length; ++i) {
             var mapping = this._mappings[i];
-            if (mapping[2] !== entry[2])
-                continue;
-            if (oldRange.containsLocation(mapping[0], mapping[1])) {
-                console.log("Old range: " + JSON.stringify(oldRange));
-                console.log("Location: (%d, %d)", mapping[0], mapping[1]);
+            if (oldRange.containsLocation(mapping[0], mapping[1]))
                 return false;
+        }
+        for (var i = 0; i < this._mappings.length; ++i) {
+            var mapping = this._mappings[i];
+            // Update compiled mapping coordinates if needed.
+            if (mapping[0] === oldRange.startLine && mapping[1] > oldRange.startColumn) {
+                mapping[1] += columnOffset;
             }
-            if (mapping[0] < oldRange.startLine || (mapping[0] === oldRange.startLine && mapping[1] < oldRange.startColumn))
-                continue;
-            mapping[0] += lineOffset;
-            mapping[1] += columnOffset;
-            mapping[3] += lineOffset;
-            mapping[4] += columnOffset;
-            console.log("lineOffset: %d  columnOffset: %d", lineOffset, columnOffset);
+            // Update source mapping coordinates if needed.
+            if (mapping[2] === entry[2] && mapping[3] === entry[3] && mapping[4] > entry[4]) {
+                mapping[4] += columnOffset;
+            }
         }
         return true;
     },
