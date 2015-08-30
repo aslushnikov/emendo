@@ -1,4 +1,3 @@
-
 WebInspector = {};
 require("./lib/utilities.js");
 require("./lib/TextRange.js");
@@ -9,29 +8,47 @@ var TestSourceProvider = require("./TestSourceProvider");
 
 var provider = new TestSourceProvider("res");
 var mapURL = "all.css.map";
-var map = new WebInspector.EditableSourceMap(provider, "all.css.map");
 
-test(provider, map, new WebInspector.TextRange(0, 4, 0, 6), "bitch");
-test(provider, map, new WebInspector.TextRange(0, 62, 0, 64), "40");
+provider.sourceForURL(mapURL)
+    .then(runTestSuite)
+    .catch(function(e) { console.error(e.stack); });
 
-function createOriginEdit(provider, map, oldRange, newText) {
-    var content = provider.sourceForURL(map.originURL());
-    var oldText = oldRange.extract(content);
-    return new SMEditor.Edit(map.originURL(), oldRange, oldText, newText);
+function runTestSuite(mapPayload) {
+    var map = new WebInspector.EditableSourceMap(JSON.parse(mapPayload), mapURL);
+    return Promise.resolve()
+        .then(bindRunTest(provider, map, new WebInspector.TextRange(0, 4, 0, 6), "bitch"))
+        .then(bindRunTest(provider, map, new WebInspector.TextRange(0, 62, 0, 64), "40"));
+}
+
+function editOriginal(provider, map, oldRange, newText) {
+    return provider.sourceForURL(map.originURL()).then(function(content) {
+        // Extract old text.
+        var oldText = oldRange.extract(content);
+        // Update content.
+        content = oldRange.replaceInText(content, newText);
+        console.log("==== ORIGINAL\n%s\n", content);
+        provider.setSourceForURL(map.originURL(), content);
+        return new SMEditor.Edit(map.originURL(), oldRange, oldText, newText);
+    });
 }
 
 function updateText(provider, edit) {
-    var content = provider.sourceForURL(edit.sourceURL);
-    content = edit.oldRange.replaceInText(content, edit.newText);
-    provider.setSourceForURL(edit.sourceURL, content);
-    console.log("==== %s\n%s\n", edit.sourceURL, content);
+    return provider.sourceForURL(edit.sourceURL).then(function(content) {
+        content = edit.oldRange.replaceInText(content, edit.newText);
+        provider.setSourceForURL(edit.sourceURL, content);
+        console.log("==== %s\n%s\n", edit.sourceURL, content);
+    });
 }
 
-function test(provider, map, range, text) {
-    var edit = createOriginEdit(provider, map, range, text);
-    var results = SMEditor.doEdit(provider, map, edit);
-    console.log(JSON.stringify(results, null, 2));
-    updateText(provider, edit);
-    updateText(provider, results[0]);
+function runTest(provider, map, range, text) {
+    return editOriginal(provider, map, range, text).then(function(edit) {
+        return SMEditor.doEdit(provider, map, edit);
+    }).then(function(results) {
+        console.log(JSON.stringify(results, null, 2));
+        return updateText(provider, results[0]);
+    });
 }
 
+function bindRunTest(provider, map, range, text) {
+    return runTest.bind(null, provider, map, range, text);
+}

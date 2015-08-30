@@ -30,14 +30,14 @@ TestSourceProvider.prototype = {
 
     /**
      * @param {string} sourceURL
-     * @return {?string}
+     * @return {!Promise.<?string>}
      */
     sourceForURL: function(sourceURL)
     {
         var full = path.join(this._directory, sourceURL);
         if (!this._map.has(full))
             this._map.set(full, fs.readFileSync(full, "utf-8"));
-        return this._map.get(full);
+        return Promise.resolve(this._map.get(full));
     },
 
     /**

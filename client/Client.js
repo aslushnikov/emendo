@@ -8,9 +8,8 @@ require("./SourceMap.js");
  * @implements {SMEditor.EditableSourceMap}
  * @param {!WebInspector.SourceMap} sourceMap
  */
-WebInspector.EditableSourceMap = function(provider, sourceMapURL)
+WebInspector.EditableSourceMap = function(payload, sourceMapURL)
 {
-    var payload = JSON.parse(provider.sourceForURL(sourceMapURL));
     this._sourceMap = new WebInspector.SourceMap(sourceMapURL, payload);
     this._origin = payload.file;
 }
