@@ -2,7 +2,7 @@ var gulp = require("gulp");
 var ClosureCompiler = require("closurecompiler");
 
 gulp.task("default", function(done) {
-    ClosureCompiler.compile(["Runtime.js", "utilities.js", "TextRange.js", "ParsedURL.js", "SourceMap.js", "Shim.js"],
+    ClosureCompiler.compile(["client/Runtime.js", "lib/utilities.js", "lib/TextRange.js", "lib/SourceMapEditor.js", "client/ParsedURL.js", "client/SourceMap.js", "Shim.js"],
         {
             summary_detail_level: "3",
             jscomp_error: "visibility",
