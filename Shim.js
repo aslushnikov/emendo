@@ -1,4 +1,5 @@
 WebInspector = {};
+require("./lib/diff_match_patch.js");
 require("./lib/utilities.js");
 require("./lib/TextRange.js");
 require("./lib/SourceMapEditor.js");
@@ -8,6 +9,15 @@ var TestSourceProvider = require("./TestSourceProvider");
 
 var provider = new TestSourceProvider("res");
 var mapURL = "all.css.map";
+
+
+var content1 = "border: 1px solid black;\ncolor: red;";
+var content2 = "border: 2px dotted red;\ncolor: green;";
+var edits = SMEditor.computeEditDiff("test.css", content1, content2);
+for (var edit of edits) {
+    console.log(JSON.stringify(edit, null, 2));
+}
+
 
 provider.sourceForURL(mapURL)
     .then(runTestSuite)
