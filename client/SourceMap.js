@@ -87,9 +87,10 @@ WebInspector.SourceMap.prototype = {
     /**
      * @param {!WebInspector.TextRange} oldRange
      * @param {!WebInspector.TextRange} newRange
+     * @param {!WebInspector.TextRange} destOldRange
      * @return {boolean}
      */
-    compiledRangeEdited: function(oldRange, newRange)
+    compiledRangeEdited: function(oldRange, newRange, destOldRange)
     {
         console.assert(oldRange.startLine === newRange.startLine);
         console.assert(oldRange.startColumn === newRange.startColumn);
@@ -97,6 +98,7 @@ WebInspector.SourceMap.prototype = {
         if (newRange.startLine !== newRange.endLine || oldRange.startLine !== oldRange.endLine)
             return false;
         var columnOffset = newRange.endColumn - oldRange.endColumn;
+        var columnDestOffset = - (destOldRange.endColumn - destOldRange.startColumn) + (newRange.endColumn - newRange.startColumn);
         var entry = this.findEntry(oldRange.startLine, oldRange.startColumn);
         // Validate that edit does not eat any mapping.
         for (var i = 0; i < this._mappings.length; ++i) {
@@ -112,7 +114,7 @@ WebInspector.SourceMap.prototype = {
             }
             // Update source mapping coordinates if needed.
             if (mapping[2] === entry[2] && mapping[3] === entry[3] && mapping[4] > entry[4]) {
-                mapping[4] += columnOffset;
+                mapping[4] += columnDestOffset;
             }
         }
         return true;

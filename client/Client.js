@@ -24,11 +24,12 @@ WebInspector.EditableSourceMap.prototype = {
     /**
      * @param {!SMEditor.TextRange} oldRange
      * @param {!SMEditor.TextRange} newRange
+     * @param {!SMEditor.TextRange} destOldRange
      * @return {boolean}
      */
-    editOrigin: function(oldRange, newRange)
+    editOrigin: function(oldRange, newRange, destOldRange)
     {
-        return this._sourceMap.compiledRangeEdited(oldRange, newRange);
+        return this._sourceMap.compiledRangeEdited(oldRange, newRange, destOldRange);
     },
 
     /**
