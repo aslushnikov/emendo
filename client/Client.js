@@ -1,5 +1,3 @@
-var path = require("path");
-
 require("./ParsedURL.js");
 require("./SourceMap.js");
 
